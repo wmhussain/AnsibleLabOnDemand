@@ -36,7 +36,7 @@
       "maxValue": 1,
       "defaultValue": 1,
       "metadata": {
-        "description": "Number of Linux Ansible Clients to deploy. Deploys RHEL 7.2"
+        "description": "Number of Linux Ansible Clients to deploy. Deploys CentOs 7.2"
       }
     },
     "remoteAllowedCIDR": {
@@ -49,7 +49,7 @@
     },
     "_artifactsLocation": {
       "type": "string",
-      "defaultValue": "https://spektraazurelabs.blob.core.windows.net/ansibletower/",
+      "defaultValue": "https://raw.githubusercontent.com/wmhussain/AnsibleLabOnDemand/master/",
       "metadata": {
         "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
       }
@@ -73,7 +73,7 @@
     "storageAccountType": "Standard_GRS",
     "virtualNetworkName": "ansible-vnet",
     "linuxSubnetName": "linux-Client-subnet",
-    "towerSubnetName": "puppet-subnet",
+    "towerSubnetName": "tower-subnet",
     "addressPrefix": "10.0.0.0/16",
     "towerSubnetPrefix": "10.0.1.0/24",
     "linuxSubnetPrefix": "10.0.2.0/24",
