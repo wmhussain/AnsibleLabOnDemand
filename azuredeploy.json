@@ -1,0 +1,637 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "User name for the user of Virtual Machine. Used for all machines"
+      }
+    },
+    "vmPassword": {
+      "type": "securestring",
+      "minLength": 12,
+      "metadata": {
+        "description": "Password for the user of Virtual Machine. Used for all machines."
+      }
+    },
+    "ansibleTowerAdminPassword": {
+      "type": "securestring",
+      "minLength": 5,
+      "metadata": {
+        "description": "Password for ansible tower console admin"
+      }
+    },
+    "ansibleTowerDatabasePassword": {
+      "type": "securestring",
+      "minLength": 5,
+      "metadata": {
+        "description": "Password for ansible tower database"
+      }
+    },
+
+    "linuxClientCount": {
+      "type": "int",
+      "minValue": 1,
+      "maxValue": 1,
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Number of Linux Ansible Clients to deploy. Deploys RHEL 7.2"
+      }
+    },
+    "remoteAllowedCIDR": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "0.0.0.0/0",
+      "metadata": {
+        "description": "Enter Public IP CIDR Allowed for accessing the deployment.Enter in 0.0.0.0/0 format. You can always modify these later in NSG Settings"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "https://spektraazurelabs.blob.core.windows.net/ansibletower/",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated.Leave blank if unsure"
+      },
+      "defaultValue": ""
+    }
+  },
+  "variables": {
+
+    "rgName": "[resourceGroup().name]",
+    "ansibleNsgName": "tower-nsg",
+    "linuxClientNsgName": "linux-Client-nsg",
+    "towerStorageName": "[concat('towerstor',uniqueString(resourceGroup().id))]",
+    "linuxClientStorageName": "[concat('linstor',uniqueString(resourceGroup().id))]",
+    "diagStorageAccountName": "[concat('diagstor',uniqueString(resourceGroup().id))]",
+    "storageAccountType": "Standard_GRS",
+    "virtualNetworkName": "ansible-vnet",
+    "linuxSubnetName": "linux-Client-subnet",
+    "towerSubnetName": "puppet-subnet",
+    "addressPrefix": "10.0.0.0/16",
+    "towerSubnetPrefix": "10.0.1.0/24",
+    "linuxSubnetPrefix": "10.0.2.0/24",
+    "linuxPrivateIpAddressStart": "10.0.2.2",
+    "publicIPAddressNameTower": "tower-pip",
+    "dnsNameTower": "[concat('tower',uniqueString(resourceGroup().id))]",
+    "towerNicName": "ansible-tower-nic",
+    "towerVmName": "vm-ansible-tower",
+    "vmLinClientName": "vm-linux-Client",
+    "vmLinClientNicName": "vm-linux-Client-nic-",
+    "vmStorageAccountContainerName": "vhds",
+    "scriptFileName": "installansibletower.sh",
+    "scriptStart": "su -c'sh ",
+    "customScriptCommand": "[concat(variables('scriptStart'), variables('scriptFileName'), ' ')]",
+    "scriptClose": "'",
+    "redHatTags": {
+      "type": "object",
+      "provider": "9d2c71fc-96ba-4b4a-93b3-14def5bc96fc"
+    },
+    "quickstartTags": {
+      "type": "object",
+      "name": "ansible-tower-rhel"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "tower-avset",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "comments": "This availability set will consist of ansible tower installed virtual machine",
+      "tags": {
+        "displayName": "Availability Set Ansible Tower",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+      }
+    },
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "Client-avset",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "comments": "This availability set will consist of linux virtual machines configured as ansible clients ",
+      "tags": {
+        "displayName": " Clients Availability Set",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('ansibleNsgName')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "comments": "This will have firewall rules for Ansible Tower Virtual machine",
+      "tags": {
+        "displayName": "Tower NSG",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow-80",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80",
+              "direction": "Inbound",
+              "priority": 201,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "allow-8080",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "8080",
+              "direction": "Inbound",
+              "priority": 202,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "allow-443",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443",
+              "direction": "Inbound",
+              "priority": 203,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 200,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('linuxClientNsgName')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "comments": "This will have firewall rules for linux clients",
+      "tags": {
+        "displayName": "Linux Client NSG",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow-80",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80",
+              "direction": "Inbound",
+              "priority": 301,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "allow-8080",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "8080",
+              "direction": "Inbound",
+              "priority": 302,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "allow-443",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443",
+              "direction": "Inbound",
+              "priority": 303,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "access": "Allow",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 300,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "[parameters('remoteAllowedCIDR')]",
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('towerStorageName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "comments": "This storage account is used to store the VM disks of ansible tower vm",
+      "tags": {
+        "displayName": "Ansible Tower Storage Account",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+        "accountType": "[variables('StorageAccountType')]"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('linuxClientStorageName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "comments": "This storage account is used to store the VM disks of RHEL Ansible Client vms",
+      "tags": {
+        "displayName": "Linux Client Storage Account",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+        "accountType": "[variables('storageAccountType')]"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('diagStorageAccountName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "comments": "This storage account is used for diagnostic data for all vms",
+      "tags": {
+        "displayName": "Diagnostics Storage Account",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "comments": "This Virtual Network contains all the VMs needed",
+      "tags": {
+        "displayName": "Puppet Virtual Network",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('ansibleNsgName'))]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('linuxClientNsgName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('towerSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('towerSubnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups',  variables('ansibleNsgName'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('linuxSubnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('linuxSubnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('linuxClientNsgName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressNameTower')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "comments": "This Public IP is used by the Ansible Tower installed VM",
+      "tags": {
+        "displayName": "Public IP - Ansible Tower",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dnsNameTower')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('towerNicName')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "comments": "This NIC will be used by ansible tower vm",
+      "tags": {
+        "displayName": "Ansible Tower NIC",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressNameTower'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "10.0.1.21",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameTower'))]"
+              },
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets/',variables('virtualNetworkName'),variables('towerSubnetName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('vmLinClientNicName'),copyIndex(1))]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "comments": "These NIC's will be used by linux Client vms",
+      "tags": {
+        "displayName": "Linux Client NICs",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "copy": {
+        "name": "linuxClientNicLoop",
+        "count": "[parameters('linuxClientCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[concat(variables('linuxPrivateIpAddressStart'),copyIndex(1))]",
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets/',variables('virtualNetworkName'),variables('linuxSubnetName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('towerVmName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "comments": "This vm will be used as ansible tower",
+      "tags": {
+        "displayName": "Ansible Tower VM",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('towerStorageName'))]",
+        "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmLinClientName'),'1'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('towerNicName'))]"
+      ],
+
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'tower-avset')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "Standard_D2_v2"
+        },
+        "osProfile": {
+          "computerName": "[variables('towerVmName')]",
+          "adminUsername": "[parameters('vmUsername')]",
+          "adminPassword": "[parameters('vmPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "7.3",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('towerStorageName')),'2015-06-15').primaryEndpoints.blob,variables('vmStorageAccountContainerName'),'/OSDisk','.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('towerNicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('diagStorageAccountName')),'2015-06-15').primaryEndpoints.blob]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('towerVmName'),'/CustomScriptAnsible')]",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "comments": "This Script will wait untill Ansible Tower gets installed",
+      "tags": {
+        "displayName": "Ansible Tower VM Extension",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('towerVmName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[concat(parameters('_artifactslocation'), variables('scriptFileName'),parameters('_artifactsLocationSasToken'))]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat(variables('customScriptCommand'), parameters('ansibleTowerAdminPassword'),' ',parameters('ansibleTowerDatabasePassword'),' ',parameters('vmUsername'),' ',parameters('vmPassword'),' ',reference(concat(variables('vmLinClientNicName'),'1')).ipConfigurations[ 0 ].properties.privateIPAddress,' ',variables('rgName'), variables('scriptClose') )]"
+
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(variables('vmLinClientName'),copyIndex(1))]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "comments": "These vms will be used as Ansible clients",
+      "tags": {
+        "displayName": "Linux Client VMs",
+        "quickstartName": "[variables('quickstartTags').name]",
+        "provider": "[variables('redHatTags').provider]"
+      },
+      "copy": {
+        "name": "redhatClientVmLoop",
+        "count": "[parameters('linuxClientCount')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('linuxClientStorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmLinClientNicName'),copyIndex(1))]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', 'Client-avset')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "Standard_D1_v2"
+        },
+        "osProfile": {
+          "computerName": "[concat(variables('vmLinClientName'),copyIndex(1))]",
+          "adminUsername": "[parameters('vmUsername')]",
+          "adminPassword": "[parameters('vmPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "OpenLogic",
+            "offer": "CentOS",
+            "sku": "7.3",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat('vmLinClient',copyIndex(1),'os-disk')]",
+            "vhd": {
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('linuxClientStorageName')),'2015-06-15').primaryEndpoints.blob,variables('vmStorageAccountContainerName'),'/','vmLinClient',copyIndex(1),'os-disk','.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmLinClientNicName'),copyIndex(1)))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('diagStorageAccountName')),'2015-06-15').primaryEndpoints.blob]"
+          }
+        }
+      }
+    }
+
+  ],
+  "outputs": {
+    "Ansible Tower Portal FQDN:": {
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameTower')), '2016-03-30').dnsSettings.fqdn]",
+      "type": "string"
+    },
+    "Ansible Tower Portal Username": {
+      "value": "admin",
+      "type": "string"
+    },
+      "Ansible Tower Portal Password": {
+      "value": "[parameters('ansibleTowerAdminPassword')]",
+      "type": "string"
+    },
+      "Ansible Tower VM Private IP": {
+      "value": "[reference(variables('towerNicName')).ipConfigurations[ 0 ].properties.privateIPAddress]",
+      "type": "string"
+    },
+     "Ansible Tower VM Username": {
+      "value": "[parameters('vmUsername')]",
+      "type": "string"
+    },
+    "Ansible Tower VM Password": {
+      "value": "[parameters('vmPassword')]",
+      "type": "string"
+    },
+    "Client VM Private IP": {
+      "value": "[reference(concat(variables('vmLinClientNicName'),'1')).ipConfigurations[ 0 ].properties.privateIPAddress]",
+      "type": "string"
+    },
+    "Client VM Username": {
+      "value": "[parameters('vmUsername')]",
+      "type": "string"
+    },
+    "Client VM Password": {
+      "value": "[parameters('vmPassword')]",
+      "type": "string"
+    },
+    "Subscription ID": {
+      "value": "[subscription().subscriptionId]",
+      "type": "string"
+    }
+  }
+}

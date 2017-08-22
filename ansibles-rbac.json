@@ -1,0 +1,35 @@
+{
+  "Name": "Training Custom Role for Ansible Workshop",
+  "Id": "cadb4a5a-4e7a-47be-84db-05abc1dc6789",
+  "IsCustom": true,
+  "Description": "Spektra Training Custom for Role Ansible Workshop.",
+  "Actions": [
+	"Microsoft.Authorization/*/read",
+	"Microsoft.Compute/locations/*",
+  "Microsoft.Compute/*/read",
+  "Microsoft.Storage/*/read",
+	"Microsoft.Network/publicIPAddresses/*",
+  "Microsoft.Network/networkInterfaces/*",
+  "Microsoft.Network/*/read",
+	"Microsoft.Resources/deployments/*",
+	"Microsoft.Resources/subscriptions/resourceGroups/read",
+  "Microsoft.Insights/alertRules/*",
+  "Microsoft.Insights/AlertRules/*",
+	"Microsoft.Insights/components/*",
+	"Microsoft.Insights/DiagnosticSettings/*",
+	"Microsoft.Insights/diagnosticSettings/*",
+	"Microsoft.Insights/eventtypes/*",
+	"Microsoft.Insights/LogDefinitions/*",
+	"Microsoft.Insights/MetricDefinitions/*",
+	"Microsoft.Insights/Metrics/*",
+	"Microsoft.Insights/Register/Action",
+	"Microsoft.Insights/webtests/*",
+  "Microsoft.Network/virtualNetworks/subnets/join/action"
+  ],
+  "NotActions": [
+
+  ],
+  "AssignableScopes": [
+
+  ]
+}
