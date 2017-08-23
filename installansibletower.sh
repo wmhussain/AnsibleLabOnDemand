@@ -30,8 +30,8 @@ echo "StrictHostKeyChecking no" >> /etc/ssh/sshd_config
 #echo 'demouser:demoPassword1!' | chpasswd
 
 ## The following code generates SSH Keys and copies it to other hosts ##  
-#ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N ''
-#sshpass -p $4 ssh-copy-id $3@$5
+ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -b 4096 -N ''
+sshpass -p '$4' ssh-copy-id $3@$5
 
 
 #### Install Ansible ########
