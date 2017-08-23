@@ -1,0 +1,8 @@
+---
+- hosts: all
+  tasks:
+  - name: Create public ip
+    azure_rm_publicipaddress:
+     resource_group: changemerg
+     allocation_method: Dynamic
+     name: vm-linux-client-pip-1
