@@ -24,6 +24,9 @@ pip install "azure==2.0.0rc5"
 #pip install azure==2.0.0rc6 --upgrade
 pip install msrestazure
 #Disable SSH Copy prompt#
+wget  https://rhelstrg.blob.core.windows.net/ansibleazureinv/azure_rm.py
+yes | cp -f azure_rm.py /var/lib/awx/venv/tower/lib/python2.7/site-packages/awx/plugins/inventory/azure_rm.py
+
 echo "StrictHostKeyChecking no" >> /etc/ssh/sshd_config
 #sed -i 's/PasswordAuthentication\ no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
 #sed -i 's/ChallengeResponseAuthentication\ no/ChallengeResponseAuthentication\ yes/g' /etc/ssh/sshd_config
@@ -93,21 +96,21 @@ sudo bash setup.sh
 ### Disable SELinux ###
 setenforce 0
 sed -i 's/enforcing/disabled/g' /etc/selinux/config 
-cd /var/lib/awx/projects/
-git clone https://github.com/SpektraSystems/ansible-workshop.git
-chown -R awx:awx ansible-workshop
+#cd /var/lib/awx/projects/
+#git clone https://github.com/SpektraSystems/ansible-workshop.git
+#chown -R awx:awx ansible-workshop
 #str1=$(head /dev/urandom | tr -dc a-z0-9 | head -c 15 ; echo '')
 #str2=storg
 #str3=$str2$str1
 
 
-find . -type f -name "*.yml" -exec sed -i 's/changemerg/'$6'/g' {} +
-find . -type f -name "*.yml" -exec sed -i 's/changemestor/'$str3'/g' {} +
-touch dout.txt
-awk 'BEGIN {print "<html><body><h1>Hello , This is a sample website for Ansible Workshop </h1></body></html>"}' dout.txt > /etc/ansible/index.html
-cd /root
-mkdir .azure
-wget --directory-prefix=/etc/ansible https://spektraazurelabs.blob.core.windows.net/ansibletower/credentials
+#find . -type f -name "*.yml" -exec sed -i 's/changemerg/'$6'/g' {} +
+#find . -type f -name "*.yml" -exec sed -i 's/changemestor/'$str3'/g' {} +
+#touch dout.txt
+#awk 'BEGIN {print "<html><body><h1>Hello , This is a sample website for Ansible Workshop </h1></body></html>"}' dout.txt > /etc/ansible/index.html
+#cd /root
+#mkdir .azure
+#wget --directory-prefix=/etc/ansible https://spektraazurelabs.blob.core.windows.net/ansibletower/credentials
 
 exit 0
 
