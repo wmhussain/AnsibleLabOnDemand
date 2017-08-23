@@ -518,7 +518,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
-            "[concat(parameters('_artifactslocation'), variables('scriptFileName'),parameters('_artifactsLocationSasToken'))]"
+            "[concat(parameters('_artifactslocation'),'scripts/',variables('scriptFileName'),parameters('_artifactsLocationSasToken'))]"
           ]
         },
         "protectedSettings": {
