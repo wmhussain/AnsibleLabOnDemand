@@ -22,7 +22,7 @@ pip install setuptools --upgrade
 pip install packaging
 pip install "azure==2.0.0rc5"
 #pip install azure==2.0.0rc6 --upgrade
-#pip install msrestazure
+pip install msrestazure
 #Disable SSH Copy prompt#
 echo "StrictHostKeyChecking no" >> /etc/ssh/sshd_config
 #sed -i 's/PasswordAuthentication\ no/PasswordAuthentication\ yes/g' /etc/ssh/sshd_config
@@ -101,13 +101,13 @@ chown -R awx:awx ansible-workshop
 #str3=$str2$str1
 
 
-#find . -type f -name "*.yml" -exec sed -i 's/changemerg/'$6'/g' {} +
-#find . -type f -name "*.yml" -exec sed -i 's/changemestor/'$str3'/g' {} +
-#touch dout.txt
-#awk 'BEGIN {print "<html><body><h1>Hello , This is a sample website for Ansible Workshop </h1></body></html>"}' dout.txt > /etc/ansible/index.html
-#cd /root
-#mkdir .azure
-#wget --directory-prefix=/etc/ansible https://spektraazurelabs.blob.core.windows.net/ansibletower/credentials
+find . -type f -name "*.yml" -exec sed -i 's/changemerg/'$6'/g' {} +
+find . -type f -name "*.yml" -exec sed -i 's/changemestor/'$str3'/g' {} +
+touch dout.txt
+awk 'BEGIN {print "<html><body><h1>Hello , This is a sample website for Ansible Workshop </h1></body></html>"}' dout.txt > /etc/ansible/index.html
+cd /root
+mkdir .azure
+wget --directory-prefix=/etc/ansible https://spektraazurelabs.blob.core.windows.net/ansibletower/credentials
 
 exit 0
 
