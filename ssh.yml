@@ -1,1 +1,7 @@
----
+- name: restart ssh service
+  hosts: '{{ vmname }}'
+  gather_facts: no
+  tasks:
+  - service:
+     name: httpd
+     state: started  
