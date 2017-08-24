@@ -1,5 +1,7 @@
 - name: restart ssh service
   hosts: '{{ vmname }}'
+  hosts: localhost
+  connection: local
   gather_facts: no
   tasks:
   - service:
