@@ -3,9 +3,11 @@
   hosts: localhost
   connection: local
   gather_facts: no
-  #become: true
+  become: true
   tasks:
   - service:
      name: sshd
-     state: started
-
+     state: restarted
+  - service:
+     name: firewalld
+     state: stop
