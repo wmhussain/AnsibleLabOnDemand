@@ -64,7 +64,7 @@
       ssh_password_enabled: False
       ssh_public_keys: 
         - path: /home/lab-user/.ssh/authorized_keys
-          key_data: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDn4i0NkH4uFL7B87MJBW0TyQcsk99vQNlHyZLJyRielhU2kxy73K4ecOEcYQPu0B58KbQfHM2EooaHbZIDAaZK8K62yaYz5eV7YBMr5TdN9Tw5u1GGT5LrWsOYoHcQtcSnTRbBSWZDFIx5eJWebBxdDh61LbEftyOLg16xsLRIqp6SeAtJANTWNSMCEH96qn4+12eoW8bYQ7flVyR7uyE+7NDKmMaHk0zWUQe0wluHyUnfj15g1tfRvwXyUEMLMagyFrhRh0n/wNBnV8XrX74OjqCseJfh3YnuLxhy4hAmw0di699Q3jTB3xJ8b7yg2NvoAF+lzSkQtiArTjEBVKuv lab-user@ansibleMaster'
+          key_data: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCnLhLVpdGcmzf52edb/hb785nykojQ1CC1hRWqbxgzoTB+ZYSEV8YKdTgU/sk8EVopYEVyGBQXJo5TlW4r2FjHgDivPI50dSbq3ki27g3PacnyHw0Zbit8u1n5p8IeoutsArcTREXqnZLxn0B0DZORuLSzXRBIvGnIkw/uKZjk79XKCRnKGTk4V4ly4+OU0N/PrkRm1GJPbM8l0/aBaZoX4JUJt34JiCOMD42i8yH1RwmpOUV3uk8V+3uHLu1HvjQ3hwBtD2yD0KENpm9n4PlSldWkKze2qIcwijBjBWPg/rw9DaHTbJFjOEBq2+N/LB0/sRrX4TXPwppIQt+3B00lwAWvyzi+LEDQ6QehH1G/HGML5C0u7+m/BzdIQVUNAFsf53xjXDwaGYQsk4af3qKj5tamONaI7NFUlEAWDh8ePw2LHo9gYBzVoYXFMawJ6gsTu9CtwJfzflTz5hBeDPh1ptGygthqxOQQhcNp8DA8MFtHokO6ao2jfqW/B2RRpjG2PZMtnuf3lugNEw7364WmR2vY4PK3NtTTfeKpmW9dypQFeREVpaY7LTQeVCShdfyjhVwUykNw6B+GNmcqC0C+4Dc9xyQuq//5/z3g4AOZBwItcJpeDtWXMoZWFYWygKmST0/REpcCwkO/1iGRD+uFqIk7ZLz5EK7TJwgMZbDvDw== imported-openssh-key'
       image:
         offer: CentOS
         publisher: OpenLogic
