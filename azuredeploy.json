@@ -92,8 +92,6 @@
         "addressPrefix": "10.0.0.0/16",
         "towerSubnetPrefix": "10.0.1.0/24",
         "linuxSubnetPrefix": "10.0.2.0/24",
-        "linuxPrivateIpAddressStart": "10.0.2.2",
-
         "publicIPAddressNameTower": "tower-pip",
         "publicIPAddressNameLinAgent": "linagent-pip",
         "dnsNameTower": "[concat('tower',uniqueString(resourceGroup().id))]",
@@ -466,7 +464,6 @@
                     "name": "ipconfig1",
                     "properties": {
                         "privateIPAllocationMethod": "Dynamic",
-                        "privateIPAddress": "[concat(variables('linuxPrivateIpAddressStart'),copyIndex(1))]",
                         "publicIPAddress": {
                             "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressNameLinAgent'),copyIndex(1)))]"
                         },
