@@ -430,7 +430,6 @@
                     "name": "ipconfig1",
                     "properties": {
                         "privateIPAllocationMethod": "Dynamic",
-                        "privateIPAddress": "10.0.1.21",
                         "publicIPAddress": {
                             "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameTower'))]"
                         },
