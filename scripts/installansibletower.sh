@@ -4,8 +4,8 @@
 ## Argument 3 will be username for Client VMs  ##
 ## Argument 4 will be password for Client Vms  ##
 ## Argument 5 will be IP address of client VM 1 ##
-## Argument 6 will be IP address of client VM 2 ##
 ## Argument 6 will be Resource Group Name ##
+## Argument 7 will be DNS name of TowerVM
 ## To execute this script run sudo su -c'sh installAnsibleTowerScript.sh Ansibleadminpassword Databaseadminpassword ClientVMsUsername ClientVMsPassword ClientVm01IP ClientVm02IP'  ##
 
 yum clean all
@@ -96,14 +96,13 @@ sudo bash setup.sh
 ### Disable SELinux ###
 setenforce 0
 sed -i 's/enforcing/disabled/g' /etc/selinux/config 
+curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"eula_accepted" : "true", "company_name": "Spektra systems", "contact_email": "mazhar.warsi@spektrasystems.com", "contact_name": "Mazhar Warsi", "hostname": "6b654363fd20407b8808883cf8c421c2", "instance_count": 10, "license_date": 2123757894, "license_key": "23bacea857aedc64b97cce6db5f6e06e31903b712e3f843c3a1d50984ca52852", "license_type": "basic", "subscription_name": "Ansible Tower by Red Hat, Self-Support (10 Managed Nodes)"}' $7/api/v1/config/
 #cd /var/lib/awx/projects/
 #git clone https://github.com/SpektraSystems/ansible-workshop.git
 #chown -R awx:awx ansible-workshop
 #str1=$(head /dev/urandom | tr -dc a-z0-9 | head -c 15 ; echo '')
 #str2=storg
 #str3=$str2$str1
-
-tower-cli setting modify LICENSE '{"eula_accepted" : "true", "company_name": "Spektra systems", "contact_email": "mazhar.warsi@spektrasystems.com", "contact_name": "Mazhar Warsi", "hostname": "6b654363fd20407b8808883cf8c421c2", "instance_count": 10, "license_date": 2123757894, "license_key": "23bacea857aedc64b97cce6db5f6e06e31903b712e3f843c3a1d50984ca52852", "license_type": "basic", "subscription_name": "Ansible Tower by Red Hat, Self-Support (10 Managed Nodes)"}'
 #find . -type f -name "*.yml" -exec sed -i 's/changemerg/'$6'/g' {} +
 #find . -type f -name "*.yml" -exec sed -i 's/changemestor/'$str3'/g' {} +
 #touch dout.txt
