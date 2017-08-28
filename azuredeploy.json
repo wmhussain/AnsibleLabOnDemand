@@ -561,7 +561,7 @@
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat(variables('customScriptCommand'), parameters('ansibleTowerAdminPassword'),' ',parameters('ansibleTowerDatabasePassword'),' ',parameters('vmUsername'),' ',parameters('vmPassword'),' ',reference(concat(variables('vmLinAgentNicName'),'1')).ipConfigurations[ 0 ].properties.privateIPAddress,' ',variables('rgName'), variables('scriptClose') )]"
+                    "commandToExecute": "[concat(variables('customScriptCommand'), parameters('ansibleTowerAdminPassword'),' ',parameters('ansibleTowerDatabasePassword'),' ',parameters('vmUsername'),' ',parameters('vmPassword'),' ',reference(concat(variables('vmLinAgentNicName'),'1')).ipConfigurations[ 0 ].properties.privateIPAddress,' ',variables('rgName'), variables('publicIPAddressNameTower'), variables('scriptClose'))]"
 
                 }
             }
