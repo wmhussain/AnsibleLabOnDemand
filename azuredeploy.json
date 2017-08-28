@@ -382,7 +382,7 @@
                 "provider": "[variables('redHatTags').provider]"
             },
             "properties": {
-                "publicIPAllocationMethod": "Static",
+                "publicIPAllocationMethod": "dynamic",
                 "dnsSettings": {
                     "domainNameLabel": "[variables('dnsNameTower')]"
                 }
@@ -404,7 +404,7 @@
                 "count": "[parameters('linuxClientCount')]"
             },
             "properties": {
-                "publicIPAllocationMethod": "Static",
+                "publicIPAllocationMethod": "Dynamic",
                 "dnsSettings": {
                     "domainNameLabel": "[concat(variables('dnsNameLinAgent'),copyIndex(1))]"
                 }
@@ -429,7 +429,7 @@
                 "ipConfigurations": [{
                     "name": "ipconfig1",
                     "properties": {
-                        "privateIPAllocationMethod": "Static",
+                        "privateIPAllocationMethod": "Dynamic",
                         "privateIPAddress": "10.0.1.21",
                         "publicIPAddress": {
                             "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressNameTower'))]"
@@ -466,7 +466,7 @@
                 "ipConfigurations": [{
                     "name": "ipconfig1",
                     "properties": {
-                        "privateIPAllocationMethod": "Static",
+                        "privateIPAllocationMethod": "Dynamic",
                         "privateIPAddress": "[concat(variables('linuxPrivateIpAddressStart'),copyIndex(1))]",
                         "publicIPAddress": {
                             "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressNameLinAgent'),copyIndex(1)))]"
