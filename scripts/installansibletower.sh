@@ -102,20 +102,8 @@ url1="https://$7/api/v1/users/"
 sleep 10
 curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"eula_accepted" : "true", "company_name": "Spektra systems", "contact_email": "mazhar.warsi@spektrasystems.com", "contact_name": "Mazhar Warsi", "hostname": "6b654363fd20407b8808883cf8c421c2", "instance_count": 10, "license_date": 2123757894, "license_key": "23bacea857aedc64b97cce6db5f6e06e31903b712e3f843c3a1d50984ca52852", "license_type": "basic", "subscription_name": "Ansible Tower by Red Hat, Self-Support (10 Managed Nodes)"}' $url
 sleep 10
-curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"username": "labuser", "first_name": "labuser", "last_name": "labuser", "email": "labuser@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$4"}' $url1
-#cd /var/lib/awx/projects/
-#git clone https://github.com/SpektraSystems/ansible-workshop.git
-#chown -R awx:awx ansible-workshop
-#str1=$(head /dev/urandom | tr -dc a-z0-9 | head -c 15 ; echo '')
-#str2=storg
-#str3=$str2$str1
-#find . -type f -name "*.yml" -exec sed -i 's/changemerg/'$6'/g' {} +
-#find . -type f -name "*.yml" -exec sed -i 's/changemestor/'$str3'/g' {} +
-#touch dout.txt
-#awk 'BEGIN {print "<html><body><h1>Hello , This is a sample website for Ansible Workshop </h1></body></html>"}' dout.txt > /etc/ansible/index.html
-#cd /root
-#mkdir .azure
-#wget --directory-prefix=/etc/ansible https://spektraazurelabs.blob.core.windows.net/ansibletower/credentials
+password=$4
+curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"username": "labuser", "first_name": "labuser", "last_name": "labuser", "email": "labuser@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$password"}' $url1
 
 exit 0
 
