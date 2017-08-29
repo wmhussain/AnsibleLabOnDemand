@@ -103,8 +103,15 @@ sleep 10
 curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"eula_accepted" : "true", "company_name": "Spektra systems", "contact_email": "mazhar.warsi@spektrasystems.com", "contact_name": "Mazhar Warsi", "hostname": "6b654363fd20407b8808883cf8c421c2", "instance_count": 10, "license_date": 2123757894, "license_key": "23bacea857aedc64b97cce6db5f6e06e31903b712e3f843c3a1d50984ca52852", "license_type": "basic", "subscription_name": "Ansible Tower by Red Hat, Self-Support (10 Managed Nodes)"}' $url
 sleep 10
 password=$4
-curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"username": "labuser", "first_name": "labuser", "last_name": "labuser", "email": "labuser@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$password"}' $url1
-
+echo $password
+password=$4
+generate_post_data()
+{
+cat <<EOF
+{"username": "labuser", "first_name": "labuser", "last_name": "labuser", "email": "labuser@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$password"}
+EOF 
+}
+curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d "$(generate_post_data)" $url1
 exit 0
 
 exit 0
