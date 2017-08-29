@@ -112,6 +112,8 @@ cat <<EOF
 EOF 
 }
 curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d "$(generate_post_data)" $url1
+curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"username": "labuser1", "first_name": "labuser1", "last_name": "labuser1", "email": "lu1@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$password"}' $url1
+
 exit 0
 
 exit 0
