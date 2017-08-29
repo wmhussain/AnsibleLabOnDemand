@@ -108,11 +108,10 @@ password=$4
 generate_post_data()
 {
 cat <<EOF
-{"username": "labuser", "first_name": "labuser", "last_name": "labuser", "email": "labuser@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$password"}
-EOF 
+{ "username": "labuser2", "first_name": "labuser2", "last_name": "labuser2", "email": "labuser@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$password" }
+EOF
 }
 curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d "$(generate_post_data)" $url1
-curl -k -H "Content-Type: application/json" -X POST -u admin:$1 -d '{"username": "labuser1", "first_name": "labuser1", "last_name": "labuser1", "email": "lu1@labuser.com", "is_superuser": false, "is_system_auditor": false, "password": "$password"}' $url1
 
 exit 0
 
