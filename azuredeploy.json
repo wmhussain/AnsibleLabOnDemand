@@ -15,7 +15,7 @@
             "metadata": {
                 "description": "Password for the user of agent Virtual Machine. Used for both Linux and Windows machines."
             },
-            "defaultValue": "demoPassword1!"
+            "defaultValue": "demoPassword@1"
         },
         "ansibleTowerAdminPassword": {
             "type": "securestring",
